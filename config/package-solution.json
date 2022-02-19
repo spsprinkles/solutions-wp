@@ -1,0 +1,21 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "solutions-webpart",
+    "id": "d5bd1237-cb2c-4d9b-82a8-e0c23fd6c115",
+    "version": "0.0.0.1",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "Gunjan Datta",
+      "websiteUrl": "https://spsprinkles.com",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.13.1"
+    }
+  },
+  "paths": {
+    "zippedPackage": "../dist/solutions-wp.sppkg"
+  }
+}
