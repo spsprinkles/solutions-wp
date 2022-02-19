@@ -1,7 +1,7 @@
 import { Version } from '@microsoft/sp-core-library';
 import {
   IPropertyPaneConfiguration,
-  PropertyPaneDropdown
+  PropertyPaneDropdown, PropertyPaneTextField
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { escape } from '@microsoft/sp-lodash-subset';
@@ -10,6 +10,7 @@ import styles from './SolutionsWebPartWebPart.module.scss';
 import * as strings from 'SolutionsWebPartWebPartStrings';
 
 export interface ISolutionsWebPartWebPartProps {
+  configurationUrl: string;
   solution: string;
 }
 
@@ -41,7 +42,7 @@ export default class SolutionsWebPartWebPart extends BaseClientSideWebPart<ISolu
         // Validate the selected solution
         if (this.properties.solution) {
           // Get the solution
-          let solution = this.getSolution(this.properties.solution).then(
+          this.getSolution(this.properties.solution).then(
             // Success
             solution => {
               if (solution) {
@@ -81,27 +82,12 @@ export default class SolutionsWebPartWebPart extends BaseClientSideWebPart<ISolu
             }
           );
         } else {
-          // Render a button
-          let elButton = Components.Button({
-            text: "Select Solution",
-            type: Components.ButtonTypes.OutlineSuccess,
-            onClick: () => {
-              // Open the property pane
-              this.context.propertyPane.open();
-            }
-          });
-
-          // Render the content element
-          let elContent = document.createElement("div");
-          elContent.innerHTML = "<span>No solution has been selected.</span><br/>";
-          elContent.appendChild(elButton.el);
-
           // No solution selected
           Components.Alert({
             el: this.domElement,
-            header: "Success",
-            content: elContent,
-            type: Components.AlertTypes.Success
+            header: "Solution Not Selected",
+            content: "Please edit the webpart and select a solution.",
+            type: Components.AlertTypes.Info
           });
         }
       },
@@ -147,6 +133,9 @@ export default class SolutionsWebPartWebPart extends BaseClientSideWebPart<ISolu
           groups: [
             {
               groupFields: [
+                PropertyPaneTextField('configurationUrl', {
+                  label: strings.ConfigurationFieldLabel
+                }),
                 PropertyPaneDropdown('solution', {
                   label: strings.SolutionFieldLabel,
                   options: this._solutions,
@@ -177,11 +166,6 @@ export default class SolutionsWebPartWebPart extends BaseClientSideWebPart<ISolu
     key: string;
     text: string;
   }[] = null;
-
-  // URL to the configuration file
-  private _webUrl = "/";
-  get SourceUrl(): string { return this._webUrl + "clientsideassets/solutions/"; }
-  get ConfigUrl(): string { return this.SourceUrl + "config.json"; }
 
   // Gets a solution by name
   private getSolution(key: string): PromiseLike<any> {
@@ -235,8 +219,15 @@ export default class SolutionsWebPartWebPart extends BaseClientSideWebPart<ISolu
   // Loads the configuration file
   private loadConfig(): PromiseLike<void> {
     return new Promise((resolve, reject) => {
+      // Ensure the property is set
+      if ((this.properties.configurationUrl || "").trim().length == 0) {
+        // Property is not set
+        reject("The configuration url property is not set. Edit the webpart and set this property.");
+        return;
+      }
+
       // Load the configuration file
-      Web(this._webUrl).getFileByServerRelativeUrl(this.ConfigUrl).content().execute(
+      Web().getFileByServerRelativeUrl(this.properties.configurationUrl).content().execute(
         // Success
         content => {
           // Convert the string to a json object
@@ -287,14 +278,14 @@ export default class SolutionsWebPartWebPart extends BaseClientSideWebPart<ISolu
           }
           catch {
             // Reject the request
-            reject("The configuration file at '" + this.ConfigUrl + "' is invalid.");
+            reject("The configuration file at '" + this.properties.configurationUrl + "' is invalid.");
           }
         },
 
         // Error
         () => {
           // Reject the request
-          reject("The configuration file could not be found at '" + this.ConfigUrl + "'.");
+          reject("The configuration file could not be found at '" + this.properties.configurationUrl + "'.");
         }
       );
     });

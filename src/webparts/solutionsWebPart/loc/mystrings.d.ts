@@ -1,4 +1,5 @@
 declare interface ISolutionsWebPartWebPartStrings {
+  ConfigurationFieldLabel: string;
   SolutionFieldLabel: string;
 }
 
