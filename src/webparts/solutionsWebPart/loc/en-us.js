@@ -1,6 +1,6 @@
 define([], function() {
   return {
-    "ConfigurationFieldLabel": "URl to the configuration file",
+    "ConfigurationFieldLabel": "Url to the configuration file",
     "SolutionFieldLabel": "Select a solution to load"
   }
 });
